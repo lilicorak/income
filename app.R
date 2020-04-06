@@ -1,14 +1,15 @@
 #install.packages(c("rsconnect", "shiny", "ggplot2", "scales", "shinythemes", "tidyverse, 
-#"shinyWidgets", "ggrepel", "itertools"))
+#"shinyWidgets", "ggrepel", "itertools", "rapport"))
 
-library(rsconnect)
-library(shiny)
-library(ggplot2)
-library(scales)
-library(shinythemes)
-library(shinyWidgets)
-library(ggrepel)
-library(itertools)
+require(rsconnect)
+require(shiny)
+require(ggplot2)
+require(scales)
+require(shinythemes)
+require(shinyWidgets)
+require(ggrepel)
+require(itertools)
+require(rapport)
 
 
 data <- read.csv("data/finalData.csv", head=T, sep=",")
@@ -168,8 +169,11 @@ server <- function(input, output) {
     byVars <- byVars[unlist(byVarsBool)]
     
     ggplot(yearsData) + 
-      geom_line(aes(x=Year, y=VALUE, colour=interaction(yearsData[,byVars] ,drop=T, sep=", ")), size=1.5) + 
+      {if (!rapportools::is.empty(byVars[1])) geom_line(aes(x=Year, y=VALUE, 
+                                                            colour=interaction(yearsData[,byVars], drop=T, sep=", ")), size=1.5) 
+        else geom_line(aes(x=Year, y=VALUE, colour=Statistics), size=1.5)} +
       theme_classic() + scale_y_continuous(labels = comma, limits = c(0,NA)) +
+      {if (!rapportools::is.empty(byVars)) guides(colour = "legend") else guides(colour=F)} +
       labs(y=paste(input$stat,input$incomeSource), 
            x="Year", 
            title=paste(input$stat, ",", input$incomeSource, "by year"),
